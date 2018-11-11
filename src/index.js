@@ -7,10 +7,11 @@ import { Provider } from "react-redux";
 import { createStore } from "redux";
 import rootReducer from "./redux/reducers";
 
-
+const eventId = document.getElementById("eventId").innerHTML;
+const userId = document.getElementById("subId").innerHTML;
 ReactDOM.render(
 <Provider store={createStore(rootReducer)}>
-<Comments   eventId = {3} />
+<Comments   eventId = {eventId} subId = {userId} />
 </Provider>
 , document.getElementById('commentContainer'));
 registerServiceWorker();

@@ -1,7 +1,8 @@
-import { ADD_COMMENT } from './actionTypes';
-import { postEvent } from '../rest'
+import { ADD_COMMENT,POST_REPLY } from './actionTypes';
 
 let nextTodoId = 0;
+
+let nextTodoReplyId = 0;
 
 export const addComment = comment => (
   {
@@ -11,3 +12,13 @@ export const addComment = comment => (
     comment
   }
 });
+
+export const addReply = (reply) =>(
+{
+  type: POST_REPLY,
+  payload: {
+    id:++nextTodoReplyId,
+    reply
+  }
+}
+);

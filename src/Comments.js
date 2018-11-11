@@ -6,15 +6,23 @@ import { addComment } from "./redux/actions";
 import moment from 'moment';
 import { Form, TextArea, Button } from 'semantic-ui-react'
 import rest from './rest';
+import Reply from './Reply'
+import ReactDOM from 'react-dom';
+import { createStore } from "redux";
+import rootReducer from "./redux/reducers";
+
 class Comments extends Component {
   constructor(props) {
     super(props);
-    this.state = { comments: '', restResponse: '', addCommentId: [], active: 'active', error: [] };
+    this.state = { comments: '', restResponse: '', addCommentId: [], active: 'active', error: [] ,replyError: [] ,reply:''};
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.showReply = this.showReply.bind(this);
     this.handleHide = this.handleHide.bind(this);
     this.handleShow = this.handleShow.bind(this);
+    this.handleUpdateResponse = this.handleUpdateResponse.bind(this);
+    console.log('The event Id'+this.props.eventId);
+    console.log('This sub id is '+this.props.subId);
   }
   handleChange(event) {
     this.setState({ comments: event.target.value });
@@ -35,15 +43,22 @@ class Comments extends Component {
   showReply(event) {
 
     const replyDiv = event.target.parentElement.nextSibling;
-    console.log(event.target.parentElement.nextSibling);
-    replyDiv.innerHTML = "<div style='margin-top:10px'><form class='ui form'><textarea placeholder='Add a reply' rows='2' style='resize:none' ></textarea><button style='margin-top:10px'  class='ui icon primary left labeled button' role='button'>Add a Reply</button></form></div>";
+    const commentId = event.target.dataset.comid;
+    ReactDOM.render(<Reply subId ={this.props.subId} handleShow={this.handleShow} handleUpdateResponse={this.handleUpdateResponse} eventId={this.props.eventId} commentId={commentId}  store={createStore(rootReducer)}/>,replyDiv);
+  }
+  handleUpdateResponse(e){
+    this.handleShow();
+    rest.getEvents(this.props.eventId).then((data) => {
+      this.setState({ restResponse: data.data });
+    })
+    setTimeout(() => { this.handleHide() }, 1000);
   }
 
   handleSubmit(event) {
     const eventItem = this.state.restResponse;
     const comments = {
       eventId: eventItem.eventId,
-      userId: eventItem.userId,
+      userId: this.props.subId,
       comment: this.state.comments
     }
     if (this.state.comments && this.state.comments != '') {
@@ -61,13 +76,9 @@ class Comments extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     // Typical usage (don't forget to compare props):
-    console.log(this.props.addCommentId.id);
     if (this.props.addCommentId.id !== (prevProps.addCommentId.id)) {
-      console.log('This is inside update');
       setTimeout(() => {
         rest.getEvents(this.props.eventId).then((data) => {
-          console.log('After rest call');
-          console.log(data.data);
           this.setState({ restResponse: data.data });
           this.handleHide();
           const error = [];
@@ -81,7 +92,6 @@ class Comments extends Component {
   render() {
 
     let allComments = this.state.restResponse.getSymposiumComment;
-    console.log(allComments);
     const error = this.state.error;
 
     return (
@@ -102,56 +112,58 @@ class Comments extends Component {
               );
             })
           }
-          <div class="ui segment">
-            {
-
-              allComments && allComments.length > 0 && allComments.map((data) => {
-                return (
-                  <div className="comment" key={Math.random()}>
-                    <div className="content">
-                      <a className="author">{data.user.name}</a>
-                      <div className="metadata">
-                        <span className="date">{moment(data.postedDate).fromNow()}</span>
-                      </div>
-                      <div className="text">
-                        <p>{data.comment}</p>
-                      </div>
-                      <div className="actions" onClick={this.showReply}>
-                        <a className="reply" >Reply</a>
-                      </div>
-                      <div class="replyComment"></div>
-                    </div>
-                    {data.symposiumCommentsReplies && data.symposiumCommentsReplies.length > 0 &&
-                      data.symposiumCommentsReplies.map((data) => {
-                        return (<div className="comments" key={Math.random()}>
-                          <div className="comment">
-                            <div className="content">
-                              <a className="author">{data.user.name}</a>
-                              <div className="metadata">
-                                <span className="date">{moment(data.postedDate).fromNow()}</span>
-                              </div>
-                              <div className="text">
-                                {data.reply}
-                              </div>
-                              <div className="actions">
-                                <a className="reply">Reply</a>
+          {allComments && allComments.length > 0 &&
+                <div class="ui segment">
+                {
+                   allComments.map((data) => {
+                    return (
+                      <div className="comment" key={Math.random()}>
+                        <div className="content">
+                          <a className="author">{data.user.name}</a>
+                          <div className="metadata">
+                            <span className="date">{moment(data.postedDate).fromNow()}</span>
+                          </div>
+                          <div className="text">
+                            <p>{data.comment}</p>
+                          </div>
+                          <div className="actions" onClick={this.showReply}>
+                            <a className="reply" data-comid={data.id} >Reply</a>
+                          </div>
+                          <div class="replyComment"></div>
+                        </div>
+                        {data.symposiumCommentsReplies && data.symposiumCommentsReplies.length > 0 &&
+                          data.symposiumCommentsReplies.map((data1) => {
+                            return (<div className="comments" key={Math.random()}>
+                              <div className="comment">
+                                <div className="content">
+                                  <a className="author">{data1.user.name}</a>
+                                  <div className="metadata">
+                                    <span className="date">{moment(data1.postedDate).fromNow()}</span>
+                                  </div>
+                                  <div className="text">
+                                    {data1.reply}
+                                  </div>
+                                  <div className="actions" onClick={this.showReply}>
+                                    <a className="reply" data-comid={data.id}>Reply</a>
+                                  </div>
+                                  <div class="replyComment"></div>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </div>
-                        );
-                      })
-                    }
-                  </div>
-                );
-              })
-            }
-            <div className={this.state.active + " ui  inverted dimmer"}>
-              <div className="ui medium text loader">Loading</div>
-            </div>
-            <p></p>
-            <p></p>
-          </div>
+                            );
+                          })
+                        }
+                      </div>
+                    );
+                  })
+                }
+                <div className={this.state.active + " ui  inverted dimmer"}>
+                  <div className="ui medium text loader">Loading</div>
+                </div>
+                <p></p>
+                <p></p>
+              </div>
+          }
         </div>
       </div>
     );
