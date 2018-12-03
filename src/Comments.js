@@ -29,6 +29,8 @@ class Comments extends Component {
     console.log('This sub id is ' + this.props.subId);
     this.show = this.show.bind(this);
     this.close = this.close.bind(this);
+    this.handleLike = this.handleLike.bind(this);
+    this.handleLikeReply = this.handleLikeReply.bind(this);
   }
   handleShow() {
     this.setState({ active: 'active' });
@@ -44,6 +46,12 @@ class Comments extends Component {
   }
   handleEmail(event) {
     this.setState({ email: event.target.value });
+  }
+  handleLike(event){
+    alert("like clicked");
+  }
+  handleLikeReply(event){
+    alert("like clicked");
   }
   handleGuestSubmit(event) {
     const eventItem = this.state.restResponse;
@@ -63,13 +71,13 @@ class Comments extends Component {
       firstName: this.state.firstName,
       email: this.state.email
     }
+    this.handleShow();
     rest.createGuestUser(user).then((output) =>{
       const comments = {
         eventId: eventItem.eventId,
         userId: output.data.userId,
         comment,
       }
-      console.log(comments);
       if (comment && comment !== '' && !output.userId && output.userId !== '') {
         this.setState({ comments: '' });
         this.props.addComment(comments);
@@ -80,10 +88,8 @@ class Comments extends Component {
   }
   show() {
     this.setState({ size: 'small', open: true });
-    console.log('its called');
   }
   close() {
-    console.log('close is called');
     this.setState({ open: false });
   }
   handleRedirect(event) {
@@ -128,7 +134,6 @@ class Comments extends Component {
       const error = ["Comment cannot be empty"];
       this.setState({ error });
     }
-    console.log((comment));
     if ((comment && comment !== '') && (!this.props.subId || this.props.subId !== '')) {
       this.setState({ open: true,error:[] });
       return;
@@ -229,15 +234,17 @@ class Comments extends Component {
                         <div className="text">
                           <p>{data.comment}</p>
                         </div>
-                        <div className="actions" onClick={this.showReply}>
-                          <a className="reply" data-comid={data.id} >Reply</a>
+                        <div className="actions">
+                          <a className="reply"  onClick={this.showReply} data-comid={data.id} >Reply</a>
+                          <a onClick={this.handleLike}><i className="thumbs up icon"></i>(0) likes</a>
                         </div>
                         <div class="replyComment"></div>
                       </div>
+                      <div className="comments">
                       {data.symposiumCommentsReplies && data.symposiumCommentsReplies.length > 0 &&
                         data.symposiumCommentsReplies.map((data1) => {
-                          return (<div className="comments" key={Math.random()}>
-                            <div className="comment">
+                          return (
+                            <div className="comment" key={Math.random()}>
                               <div className="content">
                                 <a className="author">{data1.user.name}</a>
                                 <div className="metadata">
@@ -248,14 +255,15 @@ class Comments extends Component {
                                 </div>
                                 <div className="actions" onClick={this.showReply}>
                                   <a className="reply" data-comid={data.id}>Reply</a>
+                                  <a onClick={this.handleLikeReply}><i className="thumbs up icon"></i>(0) likes</a>
                                 </div>
                                 <div class="replyComment"></div>
                               </div>
                             </div>
-                          </div>
                           );
                         })
                       }
+                      </div>
                     </div>
                   );
                 })
