@@ -14,7 +14,7 @@ import rootReducer from "./redux/reducers";
 class Comments extends Component {
   constructor(props) {
     super(props);
-    this.state = { comments: '', restResponse: '', addCommentId: [], active: 'active', error: [], replyError: [], reply: '', status: false, open: false, firstName: '', email: '' };
+    this.state = { comments: '', restResponse: '', addCommentId: [], active: 'active', error: [], replyError: [], reply: '', status: false, open: false, firstName: '', email: '',replyId:'',commentId:'',isLike:false };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.showReply = this.showReply.bind(this);
     this.handleHide = this.handleHide.bind(this);
@@ -25,12 +25,9 @@ class Comments extends Component {
     this.handleGuestSubmit = this.handleGuestSubmit.bind(this);
     this.handleName = this.handleName.bind(this);
     this.handleEmail = this.handleEmail.bind(this);
-    console.log('The event Id' + this.props.eventId);
-    console.log('This sub id is ' + this.props.subId);
     this.show = this.show.bind(this);
     this.close = this.close.bind(this);
     this.handleLike = this.handleLike.bind(this);
-    this.handleLikeReply = this.handleLikeReply.bind(this);
   }
   handleShow() {
     this.setState({ active: 'active' });
@@ -48,15 +45,24 @@ class Comments extends Component {
     this.setState({ email: event.target.value });
   }
   handleLike(event){
-    alert("like clicked");
-  }
-  handleLikeReply(event){
-    alert("like clicked");
+    const commentId = event.target.dataset.commentid;
+    const replyId = event.target.dataset.replyid;
+    this.setState({commentId,replyId,isLike:true});
+    const data = {
+      commentId,
+      userId: this.props.subId,
+      replyId
+    };
+    console.log(this.state.replyId);
+    console.log(this.state.commentId);
+    if ((!this.props.subId || this.props.subId !== '')) {
+      this.setState({ open: true,error:[] });
+      return;
+    }
   }
   handleGuestSubmit(event) {
     const eventItem = this.state.restResponse;
     const comment = this.state.comments;
-    console.log(this.state.firstName);
     if (this.state.firstName === undefined || this.state.firstName === '') {
       const error = ["Name cannot be empty"];
       this.setState({ error });
@@ -83,6 +89,25 @@ class Comments extends Component {
         this.props.addComment(comments);
         this.close();
       }
+      if(this.state.isLike){
+        const data = {
+          commentId:this.state.commentId,
+          replyId:this.state.replyId,
+          userId: output.data.userId
+        }
+        rest.addLikes(data).then(() => {
+          this.close();
+          setTimeout(() => {
+            rest.getEvents(this.props.eventId).then((data) => {
+              this.setState({ restResponse: data.data });
+              this.handleHide();
+              const error = [];
+              this.setState({ error });
+            })
+          }, 1000);
+        });
+      }
+
     });
     event.preventDefault();
   }
@@ -99,6 +124,7 @@ class Comments extends Component {
   componentDidMount() {
     rest.getEvents(this.props.eventId).then((data) => {
       this.setState({ restResponse: data.data });
+      console.log(data.data);
     })
     setTimeout(() => { this.handleHide() }, 1000);
   }
@@ -236,7 +262,7 @@ class Comments extends Component {
                         </div>
                         <div className="actions">
                           <a className="reply"  onClick={this.showReply} data-comid={data.id} >Reply</a>
-                          <a onClick={this.handleLike}><i className="thumbs up icon"></i>(0) likes</a>
+                          <a data-commentid={data.id} onClick={this.handleLike}><i className="thumbs up icon"></i>({data.likeCount}) likes</a>
                         </div>
                         <div class="replyComment"></div>
                       </div>
@@ -253,9 +279,9 @@ class Comments extends Component {
                                 <div className="text">
                                   {data1.reply}
                                 </div>
-                                <div className="actions" onClick={this.showReply}>
-                                  <a className="reply" data-comid={data.id}>Reply</a>
-                                  <a onClick={this.handleLikeReply}><i className="thumbs up icon"></i>(0) likes</a>
+                                <div className="actions" >
+                                  <a className="reply"onClick={this.showReply} data-comid={data.id}>Reply</a>
+                                  <a data-replyid={data1.symposiumReplyId} onClick={this.handleLike}><i className="thumbs up icon"></i>({data1.likeCount}) likes</a>
                                 </div>
                                 <div class="replyComment"></div>
                               </div>

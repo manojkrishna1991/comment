@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { GET_EVENTS, POST_EVENT, POST_REPLY ,GUEST_USER } from '../config';
+import { GET_EVENTS, POST_EVENT, POST_REPLY ,GUEST_USER,ADD_LIKES } from '../config';
 
 const getEvents = (eventId) => {
     const url = GET_EVENTS + eventId
@@ -31,4 +31,13 @@ const createGuestUser = async(data) => {
     return response;
 }
 
-export default { getEvents, postEvent ,postReply ,createGuestUser }
+const addLikes = async(data) => {
+    console.log(data);
+    const response = await axios.post(ADD_LIKES,data,{ headers: { "Access-Control-Allow-Origin": "*", }}
+    )
+    console.log('ddasdasdsad');
+    console.log(response);
+    return response;
+}
+
+export default { getEvents, postEvent ,postReply ,createGuestUser,addLikes }
