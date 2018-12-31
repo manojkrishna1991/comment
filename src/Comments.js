@@ -53,8 +53,6 @@ class Comments extends Component {
       userId: this.props.subId,
       replyId
     };
-    console.log(this.state.replyId);
-    console.log(this.state.commentId);
     if ((!this.props.subId || this.props.subId !== '')) {
       this.setState({ open: true,error:[] });
       return;
@@ -124,7 +122,6 @@ class Comments extends Component {
   componentDidMount() {
     rest.getEvents(this.props.eventId).then((data) => {
       this.setState({ restResponse: data.data });
-      console.log(data.data);
     })
     setTimeout(() => { this.handleHide() }, 1000);
   }
@@ -184,7 +181,6 @@ class Comments extends Component {
 
   render() {
 
-    console.log(this.state.status);
 
     let allComments = this.state.restResponse.getSymposiumComment;
     const error = this.state.error;

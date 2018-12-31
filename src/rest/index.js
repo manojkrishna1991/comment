@@ -26,17 +26,12 @@ const postReply = async (data) => {
 const createGuestUser = async(data) => {
     const response = await axios.post(GUEST_USER,data,{ headers: { "Access-Control-Allow-Origin": "*", }}
     )
-    console.log('success');
-    console.log(response);
     return response;
 }
 
 const addLikes = async(data) => {
-    console.log(data);
     const response = await axios.post(ADD_LIKES,data,{ headers: { "Access-Control-Allow-Origin": "*", }}
     )
-    console.log('ddasdasdsad');
-    console.log(response);
     return response;
 }
 

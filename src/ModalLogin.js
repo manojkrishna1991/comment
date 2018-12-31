@@ -6,17 +6,14 @@ class ModalLogin extends Component {
 
   constructor(props){
     super(props);
-    console.log('constructor is called');
     this.state = { open: true };
     this.show = this.show.bind(this);
     this.close = this.close.bind(this);
   }
   show () {
     this.setState({ size:'small', open: true });
-    console.log('its called');
   } 
   close (){
-    console.log('close is called');
     this.setState({ open: false });
   } 
   componentDidMount() {
@@ -27,7 +24,6 @@ class ModalLogin extends Component {
       return null;
     }
     const { open, size } = this.state
-    console.log(open);
     return (
 
       <div>

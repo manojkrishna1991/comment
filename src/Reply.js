@@ -36,7 +36,6 @@ class Reply extends React.Component {
       handleGuestSubmit(event) {
         const eventItem = this.state.restResponse;
         const reply = this.state.reply;
-        console.log(this.state.firstName);
         if (this.state.firstName === undefined || this.state.firstName === '') {
           const error = ["Name cannot be empty"];
           this.setState({ error });
@@ -59,7 +58,6 @@ class Reply extends React.Component {
             commentId:this.props.commentId,
             reply:this.state.reply
         };
-          console.log(response);
           if ((this.state.reply && this.state.reply != '') && (!output.data.userId || output.data.userId !=='')) {
             this.props.addReply(response);
             this.close();
@@ -75,7 +73,6 @@ class Reply extends React.Component {
             commentId:this.props.commentId,
             reply:this.state.reply
         };
-        console.log(this.props.subId);
         if ((this.state.reply && this.state.reply != '') && (this.props.subId || this.props.subId !== '')) {
             this.props.addReply(response);
             this.props.handleShow();
@@ -84,8 +81,6 @@ class Reply extends React.Component {
             const error = ["Reply cannot be empty"];
             this.setState({ error });
           }
-          console.log('this is user Id');
-          console.log(this.props.subId);
           if ((reply && reply !== '') && (!this.props.subId || this.props.subId === '')) {
             this.setState({ open: true,error:[] });
             return;
