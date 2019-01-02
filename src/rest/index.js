@@ -1,9 +1,13 @@
 import axios from 'axios';
-import { GET_EVENTS, POST_EVENT, POST_REPLY ,GUEST_USER,ADD_LIKES } from '../config';
+import { GET_EVENTS, POST_EVENT, POST_REPLY ,GUEST_USER,ADD_LIKES,CREATE_AUTH } from '../config';
 
-const getEvents = (eventId) => {
+const getEvents = (eventId,token) => {
     const url = GET_EVENTS + eventId
-    return axios.get(url);
+    return axios.get(url,{
+        params:{
+            token
+        }
+    });
 }
 
 const postEvent = async (data) => {
@@ -35,4 +39,9 @@ const addLikes = async(data) => {
     return response;
 }
 
-export default { getEvents, postEvent ,postReply ,createGuestUser,addLikes }
+const getAuthToken = async(data) => {
+    const response = await axios.get(CREATE_AUTH);
+    return response;
+}
+
+export default { getEvents, postEvent ,postReply ,createGuestUser,addLikes,getAuthToken }

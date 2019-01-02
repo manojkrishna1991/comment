@@ -58,7 +58,7 @@ class Reply extends React.Component {
             commentId:this.props.commentId,
             reply:this.state.reply
         };
-          if ((this.state.reply && this.state.reply != '') && (!output.data.userId || output.data.userId !=='')) {
+          if ((this.state.reply && this.state.reply != '') && (output.data.userId && output.data.userId !=='')) {
             this.props.addReply(response);
             this.close();
         }

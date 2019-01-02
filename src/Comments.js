@@ -82,7 +82,8 @@ class Comments extends Component {
         userId: output.data.userId,
         comment,
       }
-      if (comment && comment !== '' && !output.userId && output.userId !== '') {
+      const userIdValue = output.data.userId;
+      if (comment && comment !== '' && userIdValue && userIdValue !== '') {
         this.setState({ comments: '' });
         this.props.addComment(comments);
         this.close();
@@ -96,12 +97,14 @@ class Comments extends Component {
         rest.addLikes(data).then(() => {
           this.close();
           setTimeout(() => {
-            rest.getEvents(this.props.eventId).then((data) => {
+            rest.getAuthToken().then((token) => {
+            rest.getEvents(this.props.eventId,token.data).then((data) => {
               this.setState({ restResponse: data.data });
               this.handleHide();
               const error = [];
               this.setState({ error });
             })
+          });
           }, 1000);
         });
       }
@@ -120,9 +123,11 @@ class Comments extends Component {
     window.location.href = url;
   }
   componentDidMount() {
-    rest.getEvents(this.props.eventId).then((data) => {
+    rest.getAuthToken().then((token) => {
+    rest.getEvents(this.props.eventId,token.data).then((data) => {
       this.setState({ restResponse: data.data });
     })
+  });
     setTimeout(() => { this.handleHide() }, 1000);
   }
 
@@ -134,9 +139,11 @@ class Comments extends Component {
   }
   handleUpdateResponse(e) {
     this.handleShow();
-    rest.getEvents(this.props.eventId).then((data) => {
+    rest.getAuthToken().then((token) => {
+    rest.getEvents(this.props.eventId,token.data).then((data) => {
       this.setState({ restResponse: data.data });
     })
+  });
     setTimeout(() => { this.handleHide() }, 1000);
   }
 
@@ -148,7 +155,7 @@ class Comments extends Component {
       userId: this.props.subId,
       comment,
     }
-    if (comment && comment !== '' && !this.props.subId && this.props.subId !== '') {
+    if (comment && comment !== '' && this.props.subId && this.props.subId !== '') {
       this.setState({ comments: '' });
       this.props.addComment(comments);
       this.handleShow();
@@ -157,7 +164,7 @@ class Comments extends Component {
       const error = ["Comment cannot be empty"];
       this.setState({ error });
     }
-    if ((comment && comment !== '') && (!this.props.subId || this.props.subId !== '')) {
+    if ((comment && comment !== '') && (!this.props.subId || this.props.subId == '')) {
       this.setState({ open: true,error:[] });
       return;
     }
@@ -168,12 +175,14 @@ class Comments extends Component {
     // Typical usage (don't forget to compare props):
     if (this.props.addCommentId.id !== (prevProps.addCommentId.id)) {
       setTimeout(() => {
-        rest.getEvents(this.props.eventId).then((data) => {
-          this.setState({ restResponse: data.data });
-          this.handleHide();
-          const error = [];
-          this.setState({ error });
-        })
+        rest.getAuthToken().then((token) => {
+          rest.getEvents(this.props.eventId,token.data).then((data) => {
+            this.setState({ restResponse: data.data });
+            this.handleHide();
+            const error = [];
+            this.setState({ error });
+          })
+        });
       }, 1000);
     }
   }
@@ -191,7 +200,7 @@ class Comments extends Component {
         <div className='ui comments'>
           <h3 className='ui dividing header'>Comments</h3>
           <Form onSubmit={this.handleSubmit}>
-            <TextArea className={this.state.error} value={this.state.comments} onChange={this.handleChange} autoHeight placeholder='Add a comment' />
+            <TextArea className='addCommentText' value={this.state.comments} onChange={this.handleChange} autoHeight style={{resize:'none'}} placeholder='Add a comment' />
             <Button primary style={{ marginTop: 10 }} type='submit'>Add Comment</Button>
           </Form>
           <div>
