@@ -10,7 +10,9 @@ import Reply from './Reply'
 import ReactDOM from 'react-dom';
 import { createStore } from "redux";
 import rootReducer from "./redux/reducers";
-
+/**
+ * class to handle the comments in symposiumhub
+ */
 class Comments extends Component {
   constructor(props) {
     super(props);
@@ -44,6 +46,10 @@ class Comments extends Component {
   handleEmail(event) {
     this.setState({ email: event.target.value });
   }
+  /** event from front end app
+   * 
+   * @param {event object} event 
+   */
   handleLike(event){
     const commentId = event.target.dataset.commentid;
     const replyId = event.target.dataset.replyid;
@@ -58,6 +64,11 @@ class Comments extends Component {
       return;
     }
   }
+  /**
+   *  handle guest submit for the user 
+   * 
+   * @param {click event} event 
+   */
   handleGuestSubmit(event) {
     const eventItem = this.state.restResponse;
     const comment = this.state.comments;
@@ -122,6 +133,9 @@ class Comments extends Component {
     const url = event.target.dataset.url;
     window.location.href = url;
   }
+  /**
+   * make calls to the authentication service and call the rest service
+   */
   componentDidMount() {
     rest.getAuthToken().then((token) => {
     rest.getEvents(this.props.eventId,token.data).then((data) => {
@@ -130,7 +144,11 @@ class Comments extends Component {
   });
     setTimeout(() => { this.handleHide() }, 1000);
   }
-
+  /**
+   * render the reply div on click
+   * 
+   * @param {click event} event 
+   */
   showReply(event) {
 
     const replyDiv = event.target.parentElement.nextSibling;
@@ -146,7 +164,10 @@ class Comments extends Component {
   });
     setTimeout(() => { this.handleHide() }, 1000);
   }
-
+/**
+ *  handle comment submit
+ * @param  event 
+ */
   handleSubmit(event) {
     const eventItem = this.state.restResponse;
     const comment = this.state.comments;
@@ -170,7 +191,11 @@ class Comments extends Component {
     }
     event.preventDefault();
   }
-
+/**
+ * update the restResponse on component update 
+ * @param  prevProps 
+ * @param  prevState 
+ */
   componentDidUpdate(prevProps, prevState) {
     // Typical usage (don't forget to compare props):
     if (this.props.addCommentId.id !== (prevProps.addCommentId.id)) {
@@ -187,7 +212,9 @@ class Comments extends Component {
     }
   }
 
-
+/**
+ * render the app content
+ */
   render() {
 
 

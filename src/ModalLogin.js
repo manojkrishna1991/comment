@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { Button, Modal } from 'semantic-ui-react'
-
+/**
+ * Login Popup for guest users
+ */
 class ModalLogin extends Component {
   
 

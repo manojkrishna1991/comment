@@ -3,7 +3,9 @@ import { Form, TextArea, Button, Modal } from 'semantic-ui-react'
 import { addReply } from "./redux/actions";
 import { connect } from "react-redux";
 import rest from "./rest"
-
+/**
+ * reply component
+ */
 class Reply extends React.Component {
 
     constructor(props){
@@ -19,6 +21,11 @@ class Reply extends React.Component {
         this.handleHide = this.handleHide.bind(this);
         this.handleShow = this.handleShow.bind(this);
     }
+    /**
+     * Update the response
+     * @param  prevProps 
+     * @param  prevState 
+     */
     componentDidUpdate(prevProps, prevState) {
         // Typical usage (don't forget to compare props):
         if (this.props.addReplyId.id !== (prevProps.addReplyId.id)) {
@@ -33,6 +40,10 @@ class Reply extends React.Component {
       close() {
         this.setState({ open: false });
       }
+      /**
+       * handle guest submit
+       * @param  event 
+       */
       handleGuestSubmit(event) {
         const eventItem = this.state.restResponse;
         const reply = this.state.reply;
@@ -65,7 +76,10 @@ class Reply extends React.Component {
         });
         event.preventDefault();
       }
-
+    /**
+     *  handle reply for submit
+     * @param  event 
+     */
     handleSubmitReply(event){
       const reply = this.state.reply;
         const response = {
@@ -103,6 +117,9 @@ class Reply extends React.Component {
       handleHide() {
         this.setState({ active: '' });
       }
+      /**
+       * render the reply div 
+       */
     render(){
         const error = this.state.error;
 
