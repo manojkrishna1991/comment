@@ -1,22 +1,15 @@
+The template is meant to be run on a node.js >= 8.x.x environment.
+You can use nvm to manage your node.js environments
+The microservice runs in the port 3000 by default
+# Install dependencies
+npm install
 
-SymposiumHub:
-
-Introduction:
-This project is developed for symposium hub as part of comments section
-
-copyrights @symposiumhub.com
-
-=======
-
+# Start  mode
+npm start
 
 
-Getting Started:
+# Build
+npm run build
 
-            
-
-PreRequisties :
-1)Download Node js 8.1 https://nodejs.org/en/download/
-
-1)Navidate to the project root directory 
-2)install all depedencies using npm install
-3) start the project using npm start
+# Run unit tests
+npm test
