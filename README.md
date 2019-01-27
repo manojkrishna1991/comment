@@ -1,6 +1,6 @@
 The template is meant to be run on a node.js >= 8.x.x environment.
 You can use nvm to manage your node.js environments
-The microservice runs in the port 3000 by default
+This runs in the port 3000 by default
 # Install dependencies
 npm install
 
