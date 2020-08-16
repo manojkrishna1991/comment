@@ -16,7 +16,7 @@ import rootReducer from "./redux/reducers";
 class Comments extends Component {
   constructor(props) {
     super(props);
-    this.state = { comments: '', restResponse: '', addCommentId: [], active: 'active', error: [], replyError: [], reply: '', status: false, open: false, firstName: '', email: '',replyId:'',commentId:'',isLike:false };
+    this.state = { comments: '', restResponse: '', addCommentId: [], active: 'active', error: [], replyError: [], reply: '', status: false, open: false, firstName: '', email: '', replyId: '', commentId: '', isLike: false };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.showReply = this.showReply.bind(this);
     this.handleHide = this.handleHide.bind(this);
@@ -50,17 +50,34 @@ class Comments extends Component {
    * 
    * @param {event object} event 
    */
-  handleLike(event){
+  handleLike(event) {
     const commentId = event.target.dataset.commentid;
     const replyId = event.target.dataset.replyid;
-    this.setState({commentId,replyId,isLike:true});
+    this.setState({ commentId, replyId, isLike: true });
     const data = {
       commentId,
       userId: this.props.subId,
       replyId
     };
-    if ((!this.props.subId || this.props.subId !== '')) {
-      this.setState({ open: true,error:[] });
+    if (this.props.subId && this.props.subId !== '') {
+      this.handleShow();
+      rest.addLikes(data).then(() => {
+        this.close();
+        setTimeout(() => {
+          rest.getAuthToken().then((token) => {
+            rest.getEvents(this.props.eventId, token.data).then((data) => {
+              this.setState({ restResponse: data.data });
+              this.handleHide();
+              const error = [];
+              this.setState({ error });
+            })
+          });
+        }, 1000);
+      });
+    }
+    console.log(data);
+    if ((!this.props.subId || this.props.subId == '')) {
+      this.setState({ open: true, error: [] });
       return;
     }
   }
@@ -87,7 +104,7 @@ class Comments extends Component {
       email: this.state.email
     }
     this.handleShow();
-    rest.createGuestUser(user).then((output) =>{
+    rest.createGuestUser(user).then((output) => {
       const comments = {
         eventId: eventItem.eventId,
         userId: output.data.userId,
@@ -99,23 +116,23 @@ class Comments extends Component {
         this.props.addComment(comments);
         this.close();
       }
-      if(this.state.isLike){
+      if (this.state.isLike) {
         const data = {
-          commentId:this.state.commentId,
-          replyId:this.state.replyId,
+          commentId: this.state.commentId,
+          replyId: this.state.replyId,
           userId: output.data.userId
         }
         rest.addLikes(data).then(() => {
           this.close();
           setTimeout(() => {
             rest.getAuthToken().then((token) => {
-            rest.getEvents(this.props.eventId,token.data).then((data) => {
-              this.setState({ restResponse: data.data });
-              this.handleHide();
-              const error = [];
-              this.setState({ error });
-            })
-          });
+              rest.getEvents(this.props.eventId, token.data).then((data) => {
+                this.setState({ restResponse: data.data });
+                this.handleHide();
+                const error = [];
+                this.setState({ error });
+              })
+            });
           }, 1000);
         });
       }
@@ -138,10 +155,12 @@ class Comments extends Component {
    */
   componentDidMount() {
     rest.getAuthToken().then((token) => {
-    rest.getEvents(this.props.eventId,token.data).then((data) => {
-      this.setState({ restResponse: data.data });
-    })
-  });
+      rest.getEvents(this.props.eventId, token.data).then((data) => {
+        let currentUrl = window.location.href;
+        currentUrl = '/requirelogin?sourceUrl=' + currentUrl;
+        this.setState({ restResponse: data.data, currentUrl });
+      })
+    });
     setTimeout(() => { this.handleHide() }, 1000);
   }
   /**
@@ -158,16 +177,18 @@ class Comments extends Component {
   handleUpdateResponse(e) {
     this.handleShow();
     rest.getAuthToken().then((token) => {
-    rest.getEvents(this.props.eventId,token.data).then((data) => {
-      this.setState({ restResponse: data.data });
-    })
-  });
+      rest.getEvents(this.props.eventId, token.data).then((data) => {
+        let url = window.location.href;
+        url = '/requirelogin?sourceUrl=' + url;
+        this.setState({ restResponse: data.data, currentUrl: url });
+      })
+    });
     setTimeout(() => { this.handleHide() }, 1000);
   }
-/**
- *  handle comment submit
- * @param  event 
- */
+  /**
+   *  handle comment submit
+   * @param  event 
+   */
   handleSubmit(event) {
     const eventItem = this.state.restResponse;
     const comment = this.state.comments;
@@ -186,23 +207,26 @@ class Comments extends Component {
       this.setState({ error });
     }
     if ((comment && comment !== '') && (!this.props.subId || this.props.subId == '')) {
-      this.setState({ open: true,error:[] });
+      this.setState({ open: true, error: [] });
       return;
     }
     event.preventDefault();
   }
-/**
- * update the restResponse on component update 
- * @param  prevProps 
- * @param  prevState 
- */
+  /**
+   * update the restResponse on component update 
+   * @param  prevProps 
+   * @param  prevState 
+   */
   componentDidUpdate(prevProps, prevState) {
     // Typical usage (don't forget to compare props):
     if (this.props.addCommentId.id !== (prevProps.addCommentId.id)) {
+
       setTimeout(() => {
         rest.getAuthToken().then((token) => {
-          rest.getEvents(this.props.eventId,token.data).then((data) => {
-            this.setState({ restResponse: data.data });
+          rest.getEvents(this.props.eventId, token.data).then((data) => {
+            let currentUrl = window.location.href;
+            currentUrl = '/requirelogin?sourceUrl=' + currentUrl;
+            this.setState({ restResponse: data.data, currentUrl });
             this.handleHide();
             const error = [];
             this.setState({ error });
@@ -212,9 +236,9 @@ class Comments extends Component {
     }
   }
 
-/**
- * render the app content
- */
+  /**
+   * render the app content
+   */
   render() {
 
 
@@ -223,50 +247,27 @@ class Comments extends Component {
 
     return (
 
-      <div>
+      <div class="ui segment">
         <div className='ui comments'>
-          <h3 className='ui dividing header'>Comments</h3>
           <Form onSubmit={this.handleSubmit}>
-            <TextArea className='addCommentText' value={this.state.comments} onChange={this.handleChange} autoHeight style={{resize:'none'}} placeholder='Add a comment' />
-            <Button primary style={{ marginTop: 10 }} type='submit'>Add Comment</Button>
+            <TextArea className='addCommentText' value={this.state.comments} onChange={this.handleChange} autoHeight style={{ resize: 'none' }} placeholder='Add a comment' />
+            <Button primary style={{ marginTop: 10,marginBottom:20 }} type='submit'>Add Comment</Button>
           </Form>
           <div>
             <Modal size={'small'} open={this.state.open} onClose={this.close}>
               <Modal.Header>
                 <div class="ui visible message">
-                  Post as Guest !!
+                  <p>
+                    Join the SymposiumHub community  to start posting your comments !!!
+
+                  </p>
+                  <div class="ui fluid buttons">
+                  <a href={this.state.currentUrl} class='ui primary big  button  secondarcolor-light'  type='submit'>LOGIN</a>
+                  <div class="or"></div>
+                  <a href={this.state.currentUrl} class='ui primary  big button secondarcolor-light'  type='submit'>REGISTER</a>
+                  </div>
                 </div>
               </Modal.Header>
-              <Modal.Content>
-                {
-                  error && error.length > 0 && error.map((data) => {
-                    return (
-                      <div key={Math.random()} className='ui error message'>
-                        <p>{data} </p>
-                      </div>
-                    );
-                  })
-                }
-                <Form onSubmit={this.handleGuestSubmit}>
-                  <div class="field">
-                    <label>Name</label>
-                    <input type="text" name="name" onChange={this.handleName} value={this.state.firstName} placeholder="Name"></input>
-                  </div>
-                  <div class="field">
-                    <label>Email</label>
-                    <input type="email" name="email" onChange={this.handleEmail} value={this.state.email} placeholder="required, but never Shown"></input>
-                  </div>
-                  <Button primary style={{ marginTop: 10 }} type='submit'>Submit</Button>
-                </Form>
-                <div class="ui divider"></div>
-                <div class="ui visible message">
-                  SignUp or Login to Post !!
-                </div>
-                <div style={{ marginTop: '30px' }} >
-                  <Button negative><a style={{ color: '#ffff' }} data-url="/signup" href="/signup" onClick={this.handleRedirect}>SignUp<i class="angle right icon"></i></a></Button>
-                  <Button positive icon='checkmark' labelPosition='right' content='Yes' ><a style={{ color: '#ffff' }} data-url="/login" onClick={this.handleRedirect} href="/login">Login<i class="angle right icon"></i></a></Button>
-                </div>
-              </Modal.Content>
             </Modal>
           </div>
           {
@@ -279,7 +280,7 @@ class Comments extends Component {
             })
           }
           {allComments && allComments.length > 0 &&
-            <div class="ui segment">
+            <div>
               {
                 allComments.map((data) => {
                   return (
@@ -287,53 +288,53 @@ class Comments extends Component {
                       <div className="content">
                         <a className="author">{data.user.name}</a>
                         <div className="metadata">
-                          <span className="date">{moment(data.postedDate).fromNow()}</span>
+                          <span className="date" style={{color:'#21ba45',fontWeight:"bold"}}>{moment(data.postedDate).fromNow()}</span>
                         </div>
                         <div className="text">
                           <p>{data.comment}</p>
                         </div>
                         <div className="actions">
-                          <a className="reply"  onClick={this.showReply} data-comid={data.id} >Reply</a>
-                          <a data-commentid={data.id} onClick={this.handleLike}><i className="thumbs up icon"></i>({data.likeCount}) likes</a>
+                          <a className="reply" onClick={this.showReply} data-comid={data.id} >Reply</a>
+                          <a data-commentid={data.id} onClick={this.handleLike}><i style={ data.likeCount > 0 ? { color:'#21ba45'} : {}} className={"thumbs up icon"}></i>({data.likeCount}) likes</a>
                         </div>
                         <div class="replyComment"></div>
                       </div>
                       <div className="comments">
-                      {data.symposiumCommentsReplies && data.symposiumCommentsReplies.length > 0 &&
-                        data.symposiumCommentsReplies.map((data1) => {
-                          return (
-                            <div className="comment" key={Math.random()}>
-                              <div className="content">
-                                <a className="author">{data1.user.name}</a>
-                                <div className="metadata">
-                                  <span className="date">{moment(data1.postedDate).fromNow()}</span>
+                        {data.symposiumCommentsReplies && data.symposiumCommentsReplies.length > 0 &&
+                          data.symposiumCommentsReplies.map((data1) => {
+                            return (
+                              <div className="comment" key={Math.random()}>
+                                <div className="content">
+                                  <a className="author">{data1.user.name}</a>
+                                  <div className="metadata">
+                                    <span className="date" style={{color:'#21ba45',fontWeight:"bold"}}>{moment(data1.postedDate).fromNow()}</span>
+                                  </div>
+                                  <div className="text">
+                                    {data1.reply}
+                                  </div>
+                                  <div className="actions" >
+                                    <a className="reply" onClick={this.showReply} data-comid={data.id}>Reply</a>
+                                    <a data-replyid={data1.symposiumReplyId} onClick={this.handleLike}><i style={ data1.likeCount > 0 ? { color:'#21ba45'} : {}} className="thumbs up icon"></i>({data1.likeCount}) likes</a>
+                                  </div>
+                                  <div class="replyComment"></div>
                                 </div>
-                                <div className="text">
-                                  {data1.reply}
-                                </div>
-                                <div className="actions" >
-                                  <a className="reply"onClick={this.showReply} data-comid={data.id}>Reply</a>
-                                  <a data-replyid={data1.symposiumReplyId} onClick={this.handleLike}><i className="thumbs up icon"></i>({data1.likeCount}) likes</a>
-                                </div>
-                                <div class="replyComment"></div>
                               </div>
-                            </div>
-                          );
-                        })
-                      }
+                            );
+                          })
+                        }
                       </div>
                     </div>
                   );
                 })
               }
-              <div className={this.state.active + " ui  inverted dimmer"}>
-                <div className="ui medium text loader">Loading</div>
-              </div>
-              <p></p>
-              <p></p>
             </div>
           }
         </div>
+        <div className={this.state.active + " ui  inverted dimmer"}>
+          <div className="ui medium text loader">Loading</div>
+        </div>
+        <p></p>
+        <p></p>
       </div>
     );
   }

@@ -11,10 +11,11 @@ const getEvents = (eventId,token) => {
 }
 
 const postEvent = async (data) => {
+
    const response = await axios.post(
         POST_EVENT,
         data.comment,
-        { headers: { "Access-Control-Allow-Origin": "*", } }
+        { headers: { "Access-Control-Allow-Origin": "*"} }
     );
 
 }
